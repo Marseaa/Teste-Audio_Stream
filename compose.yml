@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  server:
+    build: 
+      context: ./server
+      dockerfile: Dockerfile
+    image: testeaudiostream-server
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu] # Rodar na GPU
+    environment:
+      - DISPLAY=:0
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - DEBUG_COLORS=1
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./server:/app:rw
+      - ./data/pip_cache:/root/.cache/pip
+    ports:
+      - "8000:8000" # Porta para o WebSocket
+    stdin_open: true  # Entrada interativa
+    tty: true
+
+  client:
+    build: 
+      context: ./client
+      dockerfile: Dockerfile
+    image: testeaudiostream-client
+    environment:
+      - DISPLAY=:0
+      - DEBUG_COLORS=1
+      - TERM=xterm-256color
+      - COLORTERM=truecolor
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - ./client:/app:rw
+      - ./data/pip_cache:/root/.cache/pip
+    depends_on:
+      - server
+    stdin_open: true  # Entrada interativa
+    tty: true
