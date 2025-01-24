@@ -1,47 +1,25 @@
 import asyncio
 import websockets
-import wave
-import torchaudio
-import io
 
-CHUNK = 1024
-CHANNELS = 1
-RATE = 8000
-RECORD_SECONDS = 30  
+async def send_audio_to_server(audio_path="audio_teste.wav"):
+    for _ in range(10):  
+        try:
+            async with websockets.connect("ws://server:8000") as websocket:
+                with open(audio_path, "rb") as f:
+                    audio_data = f.read()
 
-async def send_audio():
-    print("Pressione ENTER para iniciar a gravação.")
-    input()  
-    print("Gravando áudio por 30 segundos...")
-    
+                print("Enviando áudio para o servidor...")
+                await websocket.send(audio_data)
 
-    with wave.open("temp_audio.wav", "wb") as wf:
-        wf.setnchannels(CHANNELS)
-        wf.setsampwidth(2)  
-        wf.setframerate(RATE)
+                transcription = await websocket.recv()
+                print("Transcrição recebida do servidor:", transcription)
+            return
+        except ConnectionRefusedError:
+            print("Servidor não está pronto. Tentando novamente em 1 segundo...")
+            await asyncio.sleep(1)
+    print("Falha ao conectar ao servidor.")
 
-        def callback(indata, frames_per_buffer, time, status):
-            if status:
-                print("Status:", status)
-            wf.writeframes(indata.copy())
+async def main():
+    await send_audio_to_server()
 
-        with sd.InputStream(samplerate=RATE, channels=CHANNELS, dtype="int16", callback=callback):
-            sd.sleep(int(RECORD_SECONDS * 1000))
-
-    print("Áudio gravado. Enviando para o servidor...")
-
-
-    waveform, sample_rate = torchaudio.load("temp_audio.wav")
-
-
-    audio_bytes = io.BytesIO()
-    torchaudio.save(audio_bytes, waveform, sample_rate, format="wav")
-    audio_bytes.seek(0)
-
-    async with websockets.connect("ws://server:8000") as websocket:  
-        await websocket.send(audio_bytes.read())
-        print("Áudio enviado. Aguardando transcrição...")
-        response = await websocket.recv()
-        print("Transcrição recebida:", response)
-
-asyncio.run(send_audio())
+asyncio.run(main())

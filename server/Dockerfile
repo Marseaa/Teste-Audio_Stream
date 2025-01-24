@@ -25,6 +25,7 @@ RUN pip install torch
 RUN pip install numpy 
 RUN pip install ffmpeg-python
 RUN pip install torchaudio
-RUN pip install --force-reinstall "faster-whisper @ https://github.com/SYSTRAN/faster-whisper/archive/refs/heads/master.tar.gz"
+RUN pip install transformers
+#RUN pip install --force-reinstall "faster-whisper @ https://github.com/SYSTRAN/faster-whisper/archive/refs/heads/master.tar.gz"
 
 ENTRYPOINT ["python3", "server.py"]

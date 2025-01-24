@@ -1,0 +1,25 @@
+services:
+  yt:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: teste_simples
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    environment:
+      - DISPLAY=:0
+      - NVIDIA_DRIVER_CAPABILITIES=all
+      - NVIDIA_VISIBLE_DEVICES=all
+      - TERM=xterm-256color
+      - DEBIAN_FRONTEND=noninteractive  
+    volumes:
+      - ./:/app:rw
+      - ./data/huggingface_cache:/root/.cache/huggingface
+      - ./data/pip_cache:/root/.cache/pip
+    stdin_open: true
+    runtime: nvidia

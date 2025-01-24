@@ -12,7 +12,7 @@ services:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu] # Rodar na GPU
+              capabilities: [gpu] 
     environment:
       - DISPLAY=:0
       - NVIDIA_DRIVER_CAPABILITIES=all
@@ -25,9 +25,11 @@ services:
       - ./server:/app:rw
       - ./data/pip_cache:/root/.cache/pip
     ports:
-      - "8000:8000" # Porta para o WebSocket
-    stdin_open: true  # Entrada interativa
+      - "8000:8000" 
+    stdin_open: true  
     tty: true
+    networks:
+      - my_network
 
   client:
     build: 
@@ -47,3 +49,8 @@ services:
       - server
     stdin_open: true  # Entrada interativa
     tty: true
+    networks:
+      - my_network
+
+networks:
+  my_network:

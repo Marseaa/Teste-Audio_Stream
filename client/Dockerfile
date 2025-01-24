@@ -5,9 +5,8 @@ ENV DEBIAN_FRONTEND=noninteractive PIP_PREFER_BINARY=1 \
 
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
-RUN apt-get update && apt-get install -y wget python3 python3-pip && \
+RUN apt-get update && apt-get install -y wget python3 python3-pip netcat && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
-
 
 RUN pip install --no-cache-dir --upgrade pip && \
     ln -s /usr/bin/python3 /usr/bin/python
@@ -26,4 +25,8 @@ RUN pip install ffmpeg-python
 RUN pip install torchaudio
 RUN pip install --force-reinstall "faster-whisper @ https://github.com/SYSTRAN/faster-whisper/archive/refs/heads/master.tar.gz"
 
-ENTRYPOINT ["python3", "client.py"]
+# Adicionar o script de inicialização
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
